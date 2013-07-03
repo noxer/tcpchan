@@ -73,7 +73,6 @@ func write(conn net.Conn, ch chan interface{}) {
 
 	enc := gob.NewEncoder(conn)
 
-cont:
 	for {
 		select {
 		case i, ok := <-ch: // seems we want to send data
@@ -89,7 +88,7 @@ cont:
 			for {
 				select {
 				case ch <- i:
-					goto cont
+					break
 				case i, ok := <-ch: // seems we want to send data (so we are unable to write the received data)
 					if !ok {
 						return
