@@ -2,7 +2,7 @@
 package tcpchan
 
 import (
-  "encoding/gob"
+	"encoding/gob"
 	"net"
 )
 
@@ -12,20 +12,20 @@ type data struct {
 }
 
 // Creates a new channel listening on addr
-func NewListener(addr string) (chan interface{}, error) {
+func Listen(addr string) (chan interface{}, error) {
 	serv, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 
 	ch := make(chan interface{})
-	go listen(serv, ch)
+	go listen(serv, ch, false)
 
 	return ch, nil
 }
 
 // Creates a new channel connecting to addr
-func NewDialer(addr string) (chan interface{}, error) {
+func Dial(addr string) (chan interface{}, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
@@ -37,8 +37,21 @@ func NewDialer(addr string) (chan interface{}, error) {
 	return ch, nil
 }
 
+// Creates a new channel listening on addr
+func ListenBlocking(addr string) (chan interface{}, error) {
+	serv, err := net.Listen("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+
+	ch := make(chan interface{})
+	listen(serv, ch, true)
+
+	return ch, nil
+}
+
 // Listenes on a socket and starts writer for the first connection
-func listen(serv net.Listener, ch chan interface{}) {
+func listen(serv net.Listener, ch chan interface{}, block bool) {
 	conn, err := serv.Accept()
 	if err != nil {
 		close(ch)
@@ -46,7 +59,11 @@ func listen(serv net.Listener, ch chan interface{}) {
 	}
 	serv.Close()
 
-	write(conn, ch)
+	if block {
+		go write(conn, ch)
+	} else {
+		write(conn, ch)
+	}
 }
 
 // Reads data from the connection conn and writes it into ch
