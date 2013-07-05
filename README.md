@@ -6,7 +6,7 @@ A network communication channel for Google Go
 ## Usage
 Server:
 
-    ch, err := tcpchan.NewListener("<local ip>:8976")
+    ch, err := tcpchan.Listen("<local ip>:8976")
     if err != nil {
         ...
     }
@@ -17,7 +17,7 @@ Server:
     
 Client:
 
-    ch, err := tcpchan.NewDialer("<remote ip>:8976")
+    ch, err := tcpchan.Dial("<remote ip>:8976")
     if err != nil {
         ...
     }
